@@ -8,7 +8,7 @@ This repository is test and tutorial documents for how to use set up tensorflow 
 This readme describes every step required to get going with running Tensorflow object detection classifier on EC2 instance;
 libraries
 
-Create an EC2 instance on AWS with Deep learning AMI (Amazon Linux) Version 17.0 - ami 0d3348bce8bdde5a6
+Create an EC2 instance on AWS with Deep learning AMI (Amazon Linux) or SageMaker notebook instance. Notice that the instance type need to be ***"p2"*** to run the tensorflow API on GPU. 
 
 Insall required libaries
 
@@ -99,7 +99,7 @@ rm faster_rcnn_inception_v2_coco_2018_01_28.tar.gz
 # From tensorflow/models/rsearch/object_detection
 git clone https://github.com/larui529/tensowflow-od-aws-ec2.git
 cp -r tensowflow-od-aws-ec2/* .
-sudo rm -f -R tensorflow-od-aws-ec2
+sudo rm -f -R tensowflow-od-aws-ec2
 ```
 
 ## Convert csv to tfrecord files
@@ -122,7 +122,7 @@ python legacy/train.py --logtostderr --train_dir=training/ --pipeline_config_pat
 
 ## Quit training 
 
-When the loss is converged we can quit training by pressing "Q" and the result will be saved 
+When the loss is converged we can quit training by pressing "Ctrl + 'c'"  and the result will be saved 
 
 ## Export inference graph
 The post-trained model is saved in tensorflow/models/research/object_detection/training. You could see the last 5 checkpoints.
@@ -140,4 +140,25 @@ cp unfrozen_exporter/exporter.py .
 python export_inference_graph.py --input_type image_tensor --pipeline_config_path training/faster_rcnn_inception_v2_pets.config --trained_checkpoint_prefix training/model.ckpt-XXXX --output_directory inference_graph # you have to change "XXXX" to the step number from the checkpoint file.
 ```
 
-## 
+After export, you should see the directory inference_graph containing the following:
+
+* saved_model/, a directory containing the saved model format of the exported model
+* frozen_inference_graph.pb, the frozen graph format of the exported model
+* model.ckpt.*, the model checkpoints used for exporting
+* checkpoint, a file specifying to restore included checkpoint files
+* pipeline.config, pipeline config file for the exported model
+```
+inference_graph
+      |-- checkpoint
+      |-- frozen_inference_graph.pb
+      |-- model.ckpt.data-00000-of-00001
+      |-- model.ckpt.index
+      |-- model.ckpt.meta
+      |-- pipeline.config
+      |-- saved_model
+            |-- saved_model.pb
+            |-- variables
+                  |-- variables.data-00000-of-00001 
+                  |-- variables.index
+```
+folder of saved_model should be in same structure as export_savedmodel from tensorflow estimator which should be able used for inference serving. 
