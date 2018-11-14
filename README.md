@@ -112,13 +112,6 @@ python generate_tfrecord.py --csv_input=images/train_labels.csv --image_dir=imag
 python generate_tfrecord.py --csv_input=images/test_labels.csv --image_dir=images/test --output_path=test.record
 ```
 
-## Download pre-trained model from modelzoo
-```bash
-# From tensorflow/models/research/object_detection
-wget http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz
-tar -xvzf faster_rcnn_inception_v2_coco_2018_01_28.tar.gz
-```
-
 ## Change mode of folder and start training
 
 ```bash
@@ -126,3 +119,25 @@ tar -xvzf faster_rcnn_inception_v2_coco_2018_01_28.tar.gz
 #sudo chmod -R 777 ~/tensorflow/*
 python legacy/train.py --logtostderr --train_dir=training/ --pipeline_config_path=training/faster_rcnn_inception_v2_pets.config
 ```
+
+## Quit training 
+
+When the loss is converged we can quit training by pressing "Q" and the result will be saved 
+
+## Export inference graph
+The post-trained model is saved in tensorflow/models/research/object_detection/training. You could see the last 5 checkpoints.
+There are two ways of export inference graph. The first one is to export frozen inference graph. The command is below:
+```bash
+# From tensorflow/models/research/object_detection
+python export_inference_graph.py --input_type image_tensor --pipeline_config_path training/faster_rcnn_inception_v2_pets.config --trained_checkpoint_prefix training/model.ckpt-XXXX --output_directory inference_graph # you have to change "XXXX" to the step number from the checkpoint file.
+```
+
+The second method could export unfrozen inference graph for serving. What we need to do is overwrite `exporter.py` file in object_detection folder. 
+I have include the modified `exporter.py` file in the folder /unfrozen_exporter/ and the following command could overwrite the current file and export inference graph
+```bash
+# From tensorflow/models/research/object_detection
+cp unfrozen_exporter/exporter.py .
+python export_inference_graph.py --input_type image_tensor --pipeline_config_path training/faster_rcnn_inception_v2_pets.config --trained_checkpoint_prefix training/model.ckpt-XXXX --output_directory inference_graph # you have to change "XXXX" to the step number from the checkpoint file.
+```
+
+## 
