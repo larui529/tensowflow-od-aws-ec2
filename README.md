@@ -77,7 +77,6 @@ API by running the following command:
 
 ```bash
 # From tensorflow/models/research/
-sudo ./bin/protoc object_detection/protos/*.proto --python_out=.
 export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
 python object_detection/builders/model_builder_test.py
 cd object_detection
@@ -89,22 +88,25 @@ if you see "OK" at the end of running, that means the environment installation f
 
 ```bash
 # From tensorflow/models/research/object_detection
+sudo su
 wget http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz
 tar -xvzf faster_rcnn_inception_v2_coco_2018_01_28.tar.gz
-sudo rm faster_rcnn_inception_v2_coco_2018_01_28.tar.gz
+rm faster_rcnn_inception_v2_coco_2018_01_28.tar.gz
 ```
 
 ## Download public training data
 ```bash
 # From tensorflow/models/rsearch/object_detection
 git clone https://github.com/larui529/tensowflow-od-aws-ec2.git
-cp tensowflow-od-aws-ec2/* .
+cp -r tensowflow-od-aws-ec2/* .
 sudo rm -f -R tensorflow-od-aws-ec2
 ```
 
 ## Convert csv to tfrecord files
 ```bash
 # From tensorflow/models/research/object_detection
+exit # exit sudo mode
+sudo chmod -R 777 ~/tensorflow/*
 python generate_tfrecord.py --csv_input=images/train_labels.csv --image_dir=images/train/ --output_path=train.record
 
 python generate_tfrecord.py --csv_input=images/test_labels.csv --image_dir=images/test --output_path=test.record
@@ -121,6 +123,6 @@ tar -xvzf faster_rcnn_inception_v2_coco_2018_01_28.tar.gz
 
 ```bash
 # From tensorflow/models/research/object_detection
-sudo chmod -R 777 ~/tensorflow/*
+#sudo chmod -R 777 ~/tensorflow/*
 python legacy/train.py --logtostderr --train_dir=training/ --pipeline_config_path=training/faster_rcnn_inception_v2_pets.config
 ```
